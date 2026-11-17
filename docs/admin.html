@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102a43">
+<title>Admissions Dashboard | Northstar</title>
+<style>
+  :root { --navy:#102a43; --blue:#1769aa; --muted:#627d98; --line:#d9e2ec; --canvas:#f3f7fa; --white:#fff; --red:#b42318; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--canvas); color:var(--navy); font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+  .topbar { height:68px; padding:0 max(5vw,22px); display:flex; align-items:center; justify-content:space-between; background:var(--white); border-bottom:1px solid var(--line); }
+  .brand { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:800; letter-spacing:.02em; }
+  .brand-mark { width:34px; height:34px; display:grid; place-items:center; border-radius:10px; background:var(--navy); color:#fff; font-size:18px; }
+  .top-actions { display:flex; align-items:center; gap:18px; }
+  a { color:var(--muted); font-weight:600; text-decoration:none; }
+  a:hover { color:var(--blue); }
+  button { border:0; border-radius:7px; cursor:pointer; font:inherit; font-weight:700; }
+  .quiet-button { padding:9px 13px; background:#edf3f8; color:var(--navy); }
+  .quiet-button:hover { background:#e1ebf3; }
+  main { width:min(1160px,calc(100% - 40px)); margin:38px auto 70px; }
+  .heading { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; margin-bottom:25px; }
+  .eyebrow { color:var(--blue); font-size:11px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; }
+  h1 { margin:5px 0 0; font-size:30px; letter-spacing:-.04em; }
+  .subtitle { margin:5px 0 0; color:var(--muted); }
+  .stat { min-width:190px; padding:15px 19px; border:1px solid var(--line); border-radius:11px; background:var(--white); }
+  .stat-label { color:var(--muted); font-size:12px; font-weight:650; }
+  .stat-number { margin-top:1px; font-size:26px; font-weight:800; line-height:1.2; }
+  .panel { overflow:hidden; border:1px solid var(--line); border-radius:12px; background:var(--white); box-shadow:0 10px 32px #102a4309; }
+  .toolbar { min-height:67px; padding:13px 17px; display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid var(--line); }
+  .toolbar h2 { margin:0; font-size:15px; }
+  .toolbar-actions { display:flex; align-items:center; gap:9px; }
+  input, select { width:min(300px,44vw); height:37px; padding:0 11px; border:1px solid #bcccdc; border-radius:7px; outline:none; background:#fff; color:var(--navy); font:inherit; }
+  input:focus, select:focus { border-color:var(--blue); box-shadow:0 0 0 3px #1769aa20; }
+  .primary-button { padding:10px 13px; background:var(--blue); color:white; }
+  .primary-button:hover { background:#0e568f; }
+  .editor { margin-bottom:18px; padding:20px; border:1px solid var(--line); border-radius:12px; background:var(--white); box-shadow:0 10px 32px #102a4309; }
+  .editor h2 { margin:0 0 15px; font-size:17px; }
+  .editor-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px 16px; }
+  .editor-field label { display:block; margin-bottom:5px; font-size:12px; font-weight:700; }
+  .editor-field input, .editor-field select { width:100%; height:40px; }
+  .editor-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:16px; }
+  .editor-actions button { padding:9px 14px; }
+  .editor-error { min-height:20px; margin:9px 0 0; color:var(--red); }
+  .edit-button { margin-right:6px; padding:7px 10px; background:#edf3f8; color:var(--navy); }
+  .edit-button:hover { background:#e1ebf3; }
+  .table-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; text-align:left; }
+  th { padding:12px 16px; background:#f7f9fb; color:var(--muted); font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
+  td { padding:14px 16px; border-top:1px solid #edf1f5; color:#334e68; vertical-align:middle; }
+  td:first-child { color:var(--navy); font-weight:700; }
+  .date { white-space:nowrap; }
+  .delete-button { padding:7px 10px; background:#fff0ee; color:var(--red); }
+  .delete-button:hover { background:#ffe3df; }
+  .empty { padding:48px 20px; color:var(--muted); text-align:center; }
+  .empty strong { display:block; margin-bottom:4px; color:var(--navy); font-size:15px; }
+  #notice { min-height:23px; margin:9px 1px 0; color:var(--red); }
+  #notice.success { color:#157347; }
+  #login { width:min(420px,calc(100% - 32px)); margin:90px auto; padding:30px; border:1px solid var(--line); border-radius:14px; background:var(--white); box-shadow:0 16px 45px #102a4310; }
+  #login h1 { font-size:25px; }
+  #login p { color:var(--muted); }
+  #login label { display:block; margin:20px 0 6px; font-weight:700; }
+  #login input { width:100%; height:43px; }
+  #login button { width:100%; margin-top:13px; }
+  #login-error { min-height:20px; margin-bottom:0; color:var(--red)!important; font-size:13px; }
+  [hidden] { display:none!important; }
+  @media(max-width:680px) { main { width:calc(100% - 24px); margin-top:25px; } .heading { align-items:flex-start; flex-direction:column; } .stat { width:100%; } .toolbar { align-items:flex-start; flex-direction:column; } .toolbar-actions { width:100%; } .toolbar-actions input { width:100%; } .editor-fields { grid-template-columns:1fr; } th,td { padding:11px 12px; } .date { min-width:110px; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="brand-mark" aria-hidden="true">S</span><span>STUDENT <span style="font-weight:500;color:#627d98">ADMINISTRATION</span></span></div>
+  <div class="top-actions"><a href="/">Registration page</a><button id="logout" class="quiet-button" hidden>Sign out</button></div>
+</header>
+<section id="login">
+  <div class="eyebrow">Administrator access</div>
+  <h1>Welcome back</h1>
+  <p>Sign in to review student registrations stored in MongoDB.</p>
+  <form id="login-form">
+    <label for="password">Admin password</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <button class="primary-button" type="submit">Sign in</button>
+    <p id="login-error" role="status" aria-live="polite"></p>
+  </form>
+</section>
+<main id="dashboard" hidden>
+  <div class="heading">
+    <div><div class="eyebrow">Admissions overview</div><h1>Student registrations</h1><p class="subtitle">Review and manage submitted student registrations.</p></div>
+    <div class="stat"><div class="stat-label">Total registrations</div><div id="total" class="stat-number">0</div></div>
+  </div>
+  <section class="panel">
+    <div class="toolbar">
+      <h2>All submissions</h2>
+      <div class="toolbar-actions">
+        <input id="search" type="search" placeholder="Search students…" aria-label="Search registrations">
+        <button id="add-student" class="primary-button" type="button">Add student</button>
+        <button id="export" class="primary-button" type="button">Export CSV</button>
+      </div>
+    </div>
+    <section id="editor" class="editor" hidden aria-labelledby="editor-title">
+      <h2 id="editor-title">Add student</h2>
+      <form id="student-form">
+        <div class="editor-fields">
+          <div class="editor-field"><label for="student-name">Full name</label><input id="student-name" name="name" maxlength="120" required></div>
+          <div class="editor-field"><label for="student-regNo">Registration number</label><input id="student-regNo" name="regNo" maxlength="40" required></div>
+          <div class="editor-field"><label for="student-course">Programme</label><select id="student-course" name="course" required><option value="" selected disabled>Select a programme</option><option>Bachelor of Software Engineering</option><option>Bachelor of Computer Science</option><option>Bachelor of Information Technology</option><option>Bachelor of Business Administration</option><option>Bachelor of Accounting and Finance</option><option>Bachelor of Education</option><option>Other</option></select></div>
+          <div class="editor-field" id="other-course-field" hidden><label for="student-otherCourse">Other programme</label><input id="student-otherCourse" name="otherCourse" maxlength="120"></div>
+          <div class="editor-field"><label for="student-year">Year of study (optional)</label><select id="student-year" name="yearOfStudy"><option value="">Not specified</option><option>Year 1</option><option>Year 2</option><option>Year 3</option><option>Year 4</option><option>Postgraduate</option></select></div>
+          <div class="editor-field"><label for="student-gender">Gender (optional)</label><select id="student-gender" name="gender"><option value="">Not specified</option><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select></div>
+          <div class="editor-field"><label for="student-email">Email address</label><input id="student-email" name="email" type="email" maxlength="254" required></div>
+        </div>
+        <p id="editor-error" class="editor-error" role="status" aria-live="polite"></p>
+        <div class="editor-actions"><button id="cancel-edit" class="quiet-button" type="button">Cancel</button><button id="save-student" class="primary-button" type="submit">Save student</button></div>
+      </form>
+    </section>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Student</th><th>Registration no.</th><th>Programme</th><th>Year</th><th>Gender</th><th>Email</th><th>Submitted</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div id="empty" class="empty" hidden><strong>No registrations found</strong>New student submissions will appear here.</div>
+    </div>
+  </section>
+  <p id="notice" role="status" aria-live="polite"></p>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+let registrations = [];
+let searchTimer;
+let editingId = null;
+
+function showDashboard() {
+  $("login").hidden = true;
+  $("dashboard").hidden = false;
+  $("logout").hidden = false;
+  loadRegistrations();
+}
+
+function resetStudentForm() {
+  editingId = null;
+  $("student-form").reset();
+  $("editor-title").textContent = "Add student";
+  $("save-student").textContent = "Save student";
+  $("editor-error").textContent = "";
+  $("other-course-field").hidden = true;
+  $("student-otherCourse").required = false;
+  $("editor").hidden = true;
+}
+
+function openStudentForm(student) {
+  resetStudentForm();
+  $("editor").hidden = false;
+  if (student) {
+    editingId = student._id;
+    $("editor-title").textContent = "Edit student";
+    $("save-student").textContent = "Save changes";
+    $("student-name").value = student.name;
+    $("student-regNo").value = student.regNo;
+    $("student-email").value = student.email;
+    $("student-year").value = student.yearOfStudy || "";
+    $("student-gender").value = student.gender || "";
+    const courseSelect = $("student-course");
+    const knownCourse = Array.from(courseSelect.options).some((option) => option.value === student.course);
+    courseSelect.value = knownCourse ? student.course : "Other";
+    if (!knownCourse) $("student-otherCourse").value = student.course;
+    $("other-course-field").hidden = knownCourse;
+    $("student-otherCourse").required = !knownCourse;
+  }
+  $("editor").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function editRegistration(student) {
+  openStudentForm(student);
+}
+
+$("add-student").addEventListener("click", () => openStudentForm());
+$("cancel-edit").addEventListener("click", resetStudentForm);
+$("student-course").addEventListener("change", () => {
+  const isOther = $("student-course").value === "Other";
+  $("other-course-field").hidden = !isOther;
+  $("student-otherCourse").required = isOther;
+  if (!isOther) $("student-otherCourse").value = "";
+});
+
+$("student-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  $("editor-error").textContent = "";
+  const button = $("save-student");
+  button.disabled = true;
+  const details = Object.fromEntries(new FormData(event.currentTarget).entries());
+  try {
+    const response = await fetch(editingId ? "/api/students/" + encodeURIComponent(editingId) : "/api/admin/students", {
+      method: editingId ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(details),
+    });
+    const result = await response.json();
+    if (response.status === 401) {
+      $("dashboard").hidden = true;
+      $("logout").hidden = true;
+      $("login").hidden = false;
+      throw new Error("Your admin session expired. Please sign in again.");
+    }
+    if (!response.ok) throw new Error(result.error || "Could not save student.");
+    resetStudentForm();
+    $("notice").textContent = result.message;
+    $("notice").className = "success";
+    await loadRegistrations();
+  } catch (error) {
+    $("editor-error").textContent = error.message || "Could not connect to the server.";
+  } finally {
+    button.disabled = false;
+  }
+});
+
+async function checkSession() {
+  try {
+    const response = await fetch("/api/admin/session");
+    if (response.ok) showDashboard();
+  } catch {
+    $("login-error").textContent = "Could not connect to the server.";
+  }
+}
+
+async function loadRegistrations() {
+  $("notice").textContent = "";
+  try {
+    const response = await fetch("/api/students?q=" + encodeURIComponent($("search").value));
+    const data = await response.json();
+    if (response.status === 401) {
+      $("dashboard").hidden = true;
+      $("logout").hidden = true;
+      $("login").hidden = false;
+      return;
+    }
+    if (!response.ok) throw new Error(data.error || "Could not load registrations.");
+    registrations = data;
+    $("total").textContent = data.length;
+    $("rows").replaceChildren();
+    $("empty").hidden = data.length > 0;
+    data.forEach((student) => {
+      const row = document.createElement("tr");
+      const values = [student.name, student.regNo, student.course, student.yearOfStudy, student.gender, student.email, new Date(student.createdAt).toLocaleDateString()];
+      values.forEach((value, index) => {
+        const cell = document.createElement("td");
+        cell.textContent = value || "—";
+        if (index === 6) cell.className = "date";
+        row.appendChild(cell);
+      });
+      const actions = document.createElement("td");
+      const edit = document.createElement("button");
+      edit.type = "button";
+      edit.className = "edit-button";
+      edit.textContent = "Edit";
+      edit.addEventListener("click", () => editRegistration(student));
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "delete-button";
+      remove.textContent = "Delete";
+      remove.addEventListener("click", () => deleteRegistration(student._id));
+      actions.append(edit, remove);
+      row.appendChild(actions);
+      $("rows").appendChild(row);
+    });
+  } catch (error) {
+    $("notice").textContent = error.message || "Could not connect to the server.";
+  }
+}
+
+$("login-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  $("login-error").textContent = "";
+  const button = event.currentTarget.querySelector("button");
+  button.disabled = true;
+  try {
+    const response = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: $("password").value }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Sign in failed.");
+    $("password").value = "";
+    showDashboard();
+  } catch (error) {
+    $("login-error").textContent = error.message || "Could not connect to the server.";
+  } finally {
+    button.disabled = false;
+  }
+});
+
+async function deleteRegistration(id) {
+  if (!confirm("Delete this student registration? This cannot be undone.")) return;
+  try {
+    const response = await fetch("/api/students/" + encodeURIComponent(id), { method: "DELETE" });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Could not delete registration.");
+    $("notice").textContent = "Registration deleted.";
+    $("notice").className = "success";
+    loadRegistrations();
+  } catch (error) {
+    $("notice").textContent = error.message || "Could not connect to the server.";
+    $("notice").className = "";
+  }
+}
+
+$("search").addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(loadRegistrations, 250);
+});
+
+$("export").addEventListener("click", () => {
+  const escape = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
+  const columns = ["Name", "Registration number", "Programme", "Year of study", "Gender", "Email", "Submitted"];
+  const lines = [columns, ...registrations.map((student) => [
+    student.name, student.regNo, student.course, student.yearOfStudy, student.gender, student.email, new Date(student.createdAt).toLocaleDateString(),
+  ])].map((row) => row.map(escape).join(",")).join("\r\n");
+  const url = URL.createObjectURL(new Blob(["\uFEFF" + lines], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "student-registrations.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+});
+
+$("logout").addEventListener("click", async () => {
+  await fetch("/api/admin/logout", { method: "POST" });
+  $("dashboard").hidden = true;
+  $("logout").hidden = true;
+  $("login").hidden = false;
+  $("password").focus();
+});
+
+checkSession();
+</script>
+</body>
+</html>
