@@ -1,0 +1,11 @@
+{
+  "name": "nosql-crud",
+  "version": "1.0.0",
+  "description": "Database2 / NoSQL course unit - simple CRUD app with MongoDB",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.4.0"
+  }
+}
